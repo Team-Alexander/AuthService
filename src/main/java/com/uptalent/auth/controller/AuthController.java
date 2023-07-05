@@ -29,7 +29,6 @@ public class AuthController {
         return "test";
     }
 
-
     @GetMapping("/secret")
     @PreAuthorize("isAuthenticated()")
     public String secret() {
