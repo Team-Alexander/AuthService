@@ -2,7 +2,7 @@ package com.uptalent.auth.jwt;
 
 import com.uptalent.auth.mapper.KeyMapper;
 import com.uptalent.auth.model.PublicKeyDTO;
-import com.uptalent.auth.model.Role;
+import com.uptalent.auth.model.enums.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;

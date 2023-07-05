@@ -1,4 +1,4 @@
-package com.uptalent.auth.model;
+package com.uptalent.auth.model.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 
