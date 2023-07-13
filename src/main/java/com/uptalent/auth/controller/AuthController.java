@@ -7,6 +7,7 @@ import com.uptalent.auth.model.PublicKeyDTO;
 import com.uptalent.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,6 +18,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public JwtResponse register(@Valid @RequestBody AuthRegister authRegister) {
         return authService.registerUser(authRegister);
     }
