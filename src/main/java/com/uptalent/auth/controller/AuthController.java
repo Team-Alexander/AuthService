@@ -1,6 +1,7 @@
 package com.uptalent.auth.controller;
 
 import com.uptalent.auth.jwt.JwtService;
+import com.uptalent.auth.model.request.AuthLogin;
 import com.uptalent.auth.model.request.AuthRegister;
 import com.uptalent.auth.model.response.JwtResponse;
 import com.uptalent.auth.model.PublicKeyDTO;
@@ -21,6 +22,12 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public JwtResponse register(@Valid @RequestBody AuthRegister authRegister) {
         return authService.registerUser(authRegister);
+    }
+
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.CREATED)
+    public JwtResponse login(@Valid @RequestBody AuthLogin authLogin) {
+        return authService.loginUser(authLogin);
     }
 
     @GetMapping("/public-key")
