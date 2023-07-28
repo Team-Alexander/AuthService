@@ -27,7 +27,7 @@ public class AuthController {
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.CREATED)
     public JwtResponse login(@Valid @RequestBody AuthLogin authLogin) {
-        return authService.loginUser(authLogin);
+        return authService.loginAccount(authLogin);
     }
 
     @GetMapping("/public-key")
