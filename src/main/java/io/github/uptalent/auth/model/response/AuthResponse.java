@@ -1,5 +1,6 @@
 package io.github.uptalent.auth.model.response;
 
+import io.github.uptalent.auth.model.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,5 +9,6 @@ import lombok.Data;
 public class AuthResponse {
     private Long id;
     private String name;
-    private String role;
+    private String email;
+    private Role role;
 }
