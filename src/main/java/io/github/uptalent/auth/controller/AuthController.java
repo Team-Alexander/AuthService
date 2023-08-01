@@ -8,7 +8,9 @@ import io.github.uptalent.auth.model.common.PublicKeyDTO;
 import io.github.uptalent.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,6 +30,13 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public JwtResponse login(@Valid @RequestBody AuthLogin authLogin) {
         return authService.loginAccount(authLogin);
+    }
+
+    @PostMapping("/logout")
+    @PreAuthorize("isAuthenticated()")
+    public void logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false)
+                           String accessToken) {
+        authService.logout(accessToken);
     }
 
     @GetMapping("/public-key")
