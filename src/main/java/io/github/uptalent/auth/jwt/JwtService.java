@@ -1,9 +1,12 @@
 package io.github.uptalent.auth.jwt;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import io.github.uptalent.auth.mapper.KeyMapper;
 import io.github.uptalent.auth.model.common.PublicKeyDTO;
 import io.github.uptalent.auth.model.enums.Role;
+import io.github.uptalent.auth.model.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
@@ -22,16 +25,17 @@ public class JwtService {
     private final KeyMapper keyMapper;
     private final String jti = UUID.randomUUID().toString();
 
-    public String generateToken(Long id, String name, Role role) {
+    public String generateToken(AuthResponse authResponse) {
         var now = Instant.now();
         var claims = JwtClaimsSet.builder()
                 .issuer(TOKEN_ISSUER)
                 .issuedAt(now)
                 .expiresAt(now.plus(EXPIRATION_TIME, MINUTES))
-                .subject(String.valueOf(id))
+                .subject(String.valueOf(authResponse.getId()))
                 .id(jti)
-                .claim(NAME_CLAIM, name)
-                .claim(ROLE_CLAIM, role.name())
+                .claim(NAME_CLAIM, authResponse.getName())
+                .claim(EMAIL_CLAIM, authResponse.getEmail())
+                .claim(ROLE_CLAIM, authResponse.getRole().name())
                 .build();
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
@@ -40,4 +44,13 @@ public class JwtService {
         return keyMapper.toPublicKeyDTO(publicKey);
     }
 
+    @SneakyThrows
+    public Instant getExpiryFromToken(JWTClaimsSet claimsSet) {
+        return claimsSet.getExpirationTime().toInstant();
+    }
+
+    @SneakyThrows
+    public String getEmailFromToken(JWTClaimsSet claimsSet) {
+        return claimsSet.getStringClaim(EMAIL_CLAIM);
+    }
 }
