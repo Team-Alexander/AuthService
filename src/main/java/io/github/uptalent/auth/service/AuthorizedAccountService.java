@@ -1,30 +1,32 @@
 package io.github.uptalent.auth.service;
 
-import io.github.uptalent.auth.jwt.JwtConstants;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static io.github.uptalent.auth.jwt.JwtConstants.EXPIRATION_TIME;
 
 @Service
 public class AuthorizedAccountService {
-    private final Set<String> authorizedAccounts;
-    private final ScheduledExecutorService scheduler;
+    private final Cache<String, Boolean> authorizedAccounts;
 
     public AuthorizedAccountService() {
-        this.authorizedAccounts = ConcurrentHashMap.newKeySet();
-        this.scheduler = Executors.newScheduledThreadPool(1);
+        authorizedAccounts = CacheBuilder.newBuilder()
+                .expireAfterWrite(EXPIRATION_TIME, TimeUnit.MINUTES)
+                .build();
     }
 
     public void saveAuthorizedAccountByEmail(String email) {
-        authorizedAccounts.add(email);
-        scheduler.schedule(() -> authorizedAccounts.remove(email), JwtConstants.EXPIRATION_TIME, TimeUnit.MINUTES);
+        authorizedAccounts.put(email, true);
     }
 
     public boolean isAuthorizedAccountByEmail(String email) {
-        return authorizedAccounts.contains(email);
+        return authorizedAccounts.getIfPresent(email) != null;
+    }
+
+    public void evictAuthorizedAccountByEmail(String email) {
+        authorizedAccounts.invalidate(email);
     }
 }
