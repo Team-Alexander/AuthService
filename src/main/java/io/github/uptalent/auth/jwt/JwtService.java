@@ -3,7 +3,6 @@ package io.github.uptalent.auth.jwt;
 import com.nimbusds.jwt.JWTClaimsSet;
 import io.github.uptalent.auth.mapper.KeyMapper;
 import io.github.uptalent.auth.model.common.PublicKeyDTO;
-import io.github.uptalent.auth.model.enums.Role;
 import io.github.uptalent.auth.model.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
