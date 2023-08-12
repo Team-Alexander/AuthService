@@ -22,8 +22,8 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public JwtResponse register(@Valid @RequestBody AuthRegister authRegister) {
-        return authService.registerUser(authRegister);
+    public void register(@Valid @RequestBody AuthRegister authRegister) {
+        authService.registerUser(authRegister);
     }
 
     @PostMapping("/login")
@@ -42,5 +42,10 @@ public class AuthController {
     @GetMapping("/public-key")
     public PublicKeyDTO getPublicKey() {
         return jwtService.getPublicKey();
+    }
+
+    @PostMapping("/verify")
+    public JwtResponse verifyAccount(@RequestParam String token) {
+        return authService.verifyAccount(token);
     }
 }
