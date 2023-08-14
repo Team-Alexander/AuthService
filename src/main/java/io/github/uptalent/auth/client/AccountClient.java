@@ -16,7 +16,7 @@ public interface AccountClient {
     @PostMapping("/api/v1/account/save")
     AuthResponse save(@RequestBody AuthRegister authRegister);
 
-    @GetMapping
+    @GetMapping("/api/v1/account")
     boolean existsByEmail(@RequestParam String email);
 
     @PostMapping("/api/v1/account/login")
