@@ -8,8 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,5 +17,5 @@ public class AccountVerify {
     private String token;
     private AuthRegister account;
     @TimeToLive
-    private LocalDateTime ttl;
+    private Long ttl;
 }

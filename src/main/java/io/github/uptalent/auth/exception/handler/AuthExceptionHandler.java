@@ -1,5 +1,6 @@
 package io.github.uptalent.auth.exception.handler;
 
+import io.github.uptalent.auth.exception.AccountVerifyNotFoundException;
 import io.github.uptalent.auth.exception.UserAlreadyExistsException;
 import io.github.uptalent.auth.exception.UserNotFoundException;
 import io.github.uptalent.starter.util.ErrorResponse;
@@ -13,7 +14,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class AuthExceptionHandler {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            AccountVerifyNotFoundException.class
+    })
     public ErrorResponse handlerNotFoundException(UserNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
