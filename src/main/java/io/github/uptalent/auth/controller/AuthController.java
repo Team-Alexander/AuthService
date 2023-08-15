@@ -3,6 +3,7 @@ package io.github.uptalent.auth.controller;
 import io.github.uptalent.auth.jwt.JwtService;
 import io.github.uptalent.auth.model.request.AuthLogin;
 import io.github.uptalent.auth.model.request.AuthRegister;
+import io.github.uptalent.auth.model.response.AuthResponse;
 import io.github.uptalent.auth.model.response.JwtResponse;
 import io.github.uptalent.auth.model.common.PublicKeyDTO;
 import io.github.uptalent.auth.service.AuthService;
@@ -27,9 +28,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.CREATED)
     public JwtResponse login(@Valid @RequestBody AuthLogin authLogin) {
         return authService.loginAccount(authLogin);
+    }
+
+    @PostMapping("/loginAfterRestore")
+    public JwtResponse loginAfterRestore(@RequestBody AuthResponse authResponse) {
+        return authService.loginAfterRestore(authResponse);
     }
 
     @PostMapping("/logout")
