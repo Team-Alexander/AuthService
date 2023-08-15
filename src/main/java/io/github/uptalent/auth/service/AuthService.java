@@ -3,8 +3,6 @@ package io.github.uptalent.auth.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.JWTParser;
 import io.github.uptalent.auth.client.AccountClient;
 import io.github.uptalent.auth.exception.UserAlreadyExistsException;
 import io.github.uptalent.auth.exception.UserNotFoundException;
@@ -16,33 +14,28 @@ import io.github.uptalent.auth.model.request.AuthRegister;
 import io.github.uptalent.auth.model.response.JwtResponse;
 import io.github.uptalent.auth.model.response.AuthResponse;
 import feign.FeignException;
+import io.github.uptalent.starter.security.JwtBlacklistService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import static io.github.uptalent.auth.jwt.JwtConstants.BEARER_PREFIX;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private static final String DEFAULT_USER = "user";
-    private static final String JWT_BLACKLIST_KEY = "jwt_blacklist:";
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
     private final AccountClient accountClient;
     private final LoginAttemptService loginAttemptService;
-    private final RedisTemplate<String, String> redisTemplate;
     private final AuthorizedAccountService authorizedAccountService;
     private final EmailProducerService emailProducerService;
     private final AccountVerifyService accountVerifyService;
+    private final JwtBlacklistService jwtBlacklistService;
 
     @Value("${email.verify-account.ttl}")
     private Long accountVerifyTtl;
@@ -90,18 +83,17 @@ public class AuthService {
         }
     }
 
-    @SneakyThrows
+    public JwtResponse loginAfterRestore(AuthResponse authResponse) {
+        String email = authResponse.getEmail();
+        authorizedAccountService.saveAuthorizedAccountByEmail(email);
+
+        return generateJwt(authResponse);
+    }
+
     public void logout(String accessToken) {
-        accessToken = accessToken.substring(BEARER_PREFIX.length());
+        String email = jwtService.getEmailFromToken(accessToken);
 
-        JWTClaimsSet claims = JWTParser.parse(accessToken).getJWTClaimsSet();
-        Instant tokenExpiration = jwtService.getExpiryFromToken(claims);
-        String email = jwtService.getEmailFromToken(claims);
-
-        String key = JWT_BLACKLIST_KEY + accessToken.toLowerCase();
-        redisTemplate.opsForValue().set(key, "");
-        redisTemplate.expireAt(key, tokenExpiration);
-
+        jwtBlacklistService.addToBlacklist(accessToken);
         authorizedAccountService.evictAuthorizedAccountByEmail(email);
     }
 
