@@ -16,10 +16,8 @@ import io.github.uptalent.auth.model.request.AuthRegister;
 import io.github.uptalent.auth.model.response.JwtResponse;
 import io.github.uptalent.auth.model.response.AuthResponse;
 import feign.FeignException;
-import io.github.uptalent.auth.repository.AccountVerifyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,9 +31,9 @@ import static io.github.uptalent.auth.jwt.JwtConstants.BEARER_PREFIX;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthService {
     private static final String DEFAULT_USER = "user";
+    private static final String JWT_BLACKLIST_KEY = "jwt_blacklist:";
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
@@ -43,36 +41,31 @@ public class AuthService {
     private final LoginAttemptService loginAttemptService;
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthorizedAccountService authorizedAccountService;
-    private final AccountVerifyRepository accountVerifyRepository;
     private final EmailProducerService emailProducerService;
+    private final AccountVerifyService accountVerifyService;
 
-    @Value("${account.verify.ttl}")
-    private Long accountVerifyDurationSec;
+    @Value("${email.verify-account.ttl}")
+    private Long accountVerifyTtl;
 
     public void registerUser(AuthRegister authRegister) {
-        if (!accountClient.existsByEmail(authRegister.getEmail())) {
-            throw new UserAlreadyExistsException("Account with email already exists");
+        String email = authRegister.getEmail().toLowerCase();
+        if (accountClient.existsByEmail(email) || accountVerifyService.existsByEmail(email)) {
+            throw new UserAlreadyExistsException("Account with email " + email + " already exists");
         }
 
         String uuid = UUID.randomUUID().toString();
-        LocalDateTime accountVerifyTtl = LocalDateTime.now().plusSeconds(accountVerifyDurationSec);
         AccountVerify accountVerify = new AccountVerify(uuid, authRegister, accountVerifyTtl);
         EmailMessageDetailInfo emailMessageDetailInfo = new EmailMessageDetailInfo(uuid,
                 DEFAULT_USER,
-                authRegister.getEmail(),
-                accountVerifyTtl);
+                email,
+                LocalDateTime.now().plusSeconds(accountVerifyTtl));
 
-        accountVerifyRepository.save(accountVerify);
+        accountVerifyService.save(email, accountVerify);
         emailProducerService.sendMessage(emailMessageDetailInfo);
     }
 
     public JwtResponse verifyAccount(String token) {
-        AccountVerify accountVerify = accountVerifyRepository.findById(token)
-                .orElseThrow();
-        AuthResponse authResponse = accountClient.save(accountVerify.getAccount());
-
-        accountVerifyRepository.deleteById(token);
-
+        AuthResponse authResponse = accountVerifyService.verifyAccount(token);
         return generateJwt(authResponse);
     }
 
@@ -105,7 +98,7 @@ public class AuthService {
         Instant tokenExpiration = jwtService.getExpiryFromToken(claims);
         String email = jwtService.getEmailFromToken(claims);
 
-        String key = "blacklist:" + accessToken.toLowerCase();
+        String key = JWT_BLACKLIST_KEY + accessToken.toLowerCase();
         redisTemplate.opsForValue().set(key, "");
         redisTemplate.expireAt(key, tokenExpiration);
 
@@ -118,8 +111,13 @@ public class AuthService {
     }
 
     private void validateLoginAccount(String email) {
-        if (authorizedAccountService.isAuthorizedAccountByEmail(email)) {
-            throw new BadCredentialsException(String.format("Account with email %s already authorized.", email));
+        if(accountVerifyService.existsByEmail(email)) {
+            throw new BadCredentialsException(String
+                    .format("Account with email %s is not verified yet.", email));
+        }
+        else if (authorizedAccountService.isAuthorizedAccountByEmail(email)) {
+            throw new BadCredentialsException(String
+                    .format("Account with email %s already authorized.", email));
         } else if (loginAttemptService.isReachedMaxAttempts(email)) {
             throw new BadCredentialsException(String
                     .format("Account with email %s already temporary blocked, try later.", email));

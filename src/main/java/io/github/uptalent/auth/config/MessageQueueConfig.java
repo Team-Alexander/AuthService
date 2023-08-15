@@ -9,17 +9,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitMQConfig {
-    @Value("${rabbitmq.queue.verify}")
-    private String queue;
+public class MessageQueueConfig {
     @Value("${rabbitmq.exchange}")
     private String exchange;
+    @Value("${rabbitmq.queue.verify}")
+    private String verifyAccountQueue;
     @Value("${rabbitmq.routing-key.verify}")
-    private String routingKey;
+    private String verifyAccountRoutingKey;
 
     @Bean
     public Queue queue() {
-        return new Queue(queue);
+        return new Queue(verifyAccountQueue);
     }
 
     @Bean
@@ -32,6 +32,6 @@ public class RabbitMQConfig {
         return BindingBuilder
                 .bind(queue())
                 .to(exchange())
-                .with(routingKey);
+                .with(verifyAccountRoutingKey);
     }
 }
