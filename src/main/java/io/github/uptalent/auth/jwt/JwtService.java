@@ -1,6 +1,7 @@
 package io.github.uptalent.auth.jwt;
 
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.JWTParser;
 import io.github.uptalent.auth.mapper.KeyMapper;
 import io.github.uptalent.auth.model.common.PublicKeyDTO;
 import io.github.uptalent.auth.model.response.AuthResponse;
@@ -44,12 +45,8 @@ public class JwtService {
     }
 
     @SneakyThrows
-    public Instant getExpiryFromToken(JWTClaimsSet claimsSet) {
-        return claimsSet.getExpirationTime().toInstant();
-    }
-
-    @SneakyThrows
-    public String getEmailFromToken(JWTClaimsSet claimsSet) {
-        return claimsSet.getStringClaim(EMAIL_CLAIM);
+    public String getEmailFromToken(String token) {
+        JWTClaimsSet claims = JWTParser.parse(token).getJWTClaimsSet();
+        return claims.getStringClaim(EMAIL_CLAIM);
     }
 }
