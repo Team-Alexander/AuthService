@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient("account-service")
+@FeignClient("uptalent-account")
 @Retry(name = "default")
 public interface AccountClient {
     @PostMapping("/api/v1/account/save")
