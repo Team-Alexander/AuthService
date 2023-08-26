@@ -1,6 +1,6 @@
 package io.github.uptalent.auth.service;
 
-import io.github.uptalent.auth.model.common.EmailMessageDetailInfo;
+import io.github.uptalent.starter.model.common.EmailMessageDetailInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;

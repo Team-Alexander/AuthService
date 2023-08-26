@@ -4,19 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.uptalent.auth.client.AccountClient;
+import io.github.uptalent.auth.exception.BlockedAccountException;
 import io.github.uptalent.auth.exception.UserAlreadyExistsException;
 import io.github.uptalent.auth.exception.UserNotFoundException;
 import io.github.uptalent.auth.jwt.JwtService;
-import io.github.uptalent.auth.model.common.EmailMessageDetailInfo;
 import io.github.uptalent.auth.model.hash.AccountVerify;
 import io.github.uptalent.auth.model.request.AuthLogin;
 import io.github.uptalent.auth.model.request.AuthRegister;
-import io.github.uptalent.auth.model.response.JwtResponse;
 import io.github.uptalent.auth.model.response.AuthResponse;
 import feign.FeignException;
+import io.github.uptalent.starter.model.common.EmailMessageDetailInfo;
+import io.github.uptalent.starter.model.response.JwtResponse;
 import io.github.uptalent.starter.security.JwtBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private static final String DEFAULT_USER = "user";
+    private static final String BLOCKED_ACCOUNT = "blocked_account:";
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
@@ -36,6 +39,7 @@ public class AuthService {
     private final EmailProducerService emailProducerService;
     private final AccountVerifyService accountVerifyService;
     private final JwtBlacklistService jwtBlacklistService;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${email.verify-account.ttl}")
     private Long accountVerifyTtl;
@@ -103,7 +107,10 @@ public class AuthService {
     }
 
     private void validateLoginAccount(String email) {
-        if(accountVerifyService.existsByEmail(email)) {
+        if(Boolean.TRUE.equals(redisTemplate.hasKey(BLOCKED_ACCOUNT + email))) {
+            throw new BlockedAccountException();
+        }
+        else if(accountVerifyService.existsByEmail(email)) {
             throw new BadCredentialsException(String
                     .format("Account with email %s is not verified yet.", email));
         }
@@ -112,7 +119,7 @@ public class AuthService {
                     .format("Account with email %s already authorized.", email));
         } else if (loginAttemptService.isReachedMaxAttempts(email)) {
             throw new BadCredentialsException(String
-                    .format("Account with email %s already temporary blocked, try later.", email));
+                    .format("Account with email %s is temporary blocked, try later.", email));
         }
     }
 

@@ -6,5 +6,4 @@ public class JwtConstants {
     public static final String ROLE_CLAIM = "role";
     public static final String NAME_CLAIM = "name";
     public static final String EMAIL_CLAIM = "email";
-    public static final String BEARER_PREFIX = "Bearer ";
 }
