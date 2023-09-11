@@ -1,6 +1,7 @@
 package io.github.uptalent.auth.exception.handler;
 
 import io.github.uptalent.auth.exception.AccountVerifyNotFoundException;
+import io.github.uptalent.auth.exception.BlockedAccountException;
 import io.github.uptalent.auth.exception.UserAlreadyExistsException;
 import io.github.uptalent.auth.exception.UserNotFoundException;
 import io.github.uptalent.starter.util.ErrorResponse;
@@ -31,6 +32,12 @@ public class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ErrorResponse handlerConflictException(UserAlreadyExistsException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(BlockedAccountException.class)
+    public ErrorResponse handlerForbiddenException(BlockedAccountException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
