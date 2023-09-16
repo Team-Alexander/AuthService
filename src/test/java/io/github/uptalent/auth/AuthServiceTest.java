@@ -10,20 +10,16 @@ import io.github.uptalent.auth.model.hash.AccountVerify;
 import io.github.uptalent.auth.model.request.AuthLogin;
 import io.github.uptalent.auth.model.request.AuthRegister;
 import io.github.uptalent.auth.model.response.AuthResponse;
-import io.github.uptalent.auth.repository.AccountVerifyRepository;
 import io.github.uptalent.auth.service.*;
 import io.github.uptalent.starter.model.common.EmailMessageDetailInfo;
 import io.github.uptalent.starter.model.response.JwtResponse;
 import io.github.uptalent.starter.security.JwtBlacklistService;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,11 +32,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
-    private static final ArgumentCaptor<AccountVerify> ACCOUNT_VERIFY_CAPTOR
-            = ArgumentCaptor.forClass(AccountVerify.class);
-    private static final ArgumentCaptor<EmailMessageDetailInfo> EMAIL_MESSAGE_CAPTOR
-            = ArgumentCaptor.forClass(EmailMessageDetailInfo.class);
-
     @Mock
     private JwtService jwtService;
     @Mock
@@ -55,8 +46,6 @@ public class AuthServiceTest {
     private AccountVerifyService accountVerifyService;
     @Mock
     private JwtBlacklistService jwtBlacklistService;
-    @Mock
-    private AccountVerifyRepository accountVerifyRepository;
     @Mock
     private RedisTemplate<String, String> redisTemplate;
     @InjectMocks

@@ -17,7 +17,6 @@ import io.github.uptalent.starter.model.common.EmailMessageDetailInfo;
 import io.github.uptalent.starter.model.response.JwtResponse;
 import io.github.uptalent.starter.security.JwtBlacklistService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.BadCredentialsException;

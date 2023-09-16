@@ -1,7 +1,6 @@
 package io.github.uptalent.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.github.uptalent.auth.client.AccountClient;
 import io.github.uptalent.auth.controller.AuthController;
 import io.github.uptalent.auth.exception.AccountVerifyNotFoundException;
 import io.github.uptalent.auth.exception.BlockedAccountException;
