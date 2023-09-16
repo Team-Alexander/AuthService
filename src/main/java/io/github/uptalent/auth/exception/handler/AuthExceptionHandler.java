@@ -19,7 +19,7 @@ public class AuthExceptionHandler {
             UserNotFoundException.class,
             AccountVerifyNotFoundException.class
     })
-    public ErrorResponse handlerNotFoundException(UserNotFoundException e) {
+    public ErrorResponse handlerNotFoundException(RuntimeException e) {
         return new ErrorResponse(e.getMessage());
     }
 
